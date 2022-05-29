@@ -29,7 +29,6 @@ use winreg::RegKey;
 #[cfg(target_family = "windows")]
 use winreg::enums::HKEY_CURRENT_USER;
 
-#[cfg(target_family = "unix")]
 use std::env;
 #[cfg(target_family = "unix")]
 use std::env::VarError;
@@ -87,22 +86,12 @@ pub fn inject(it: &str) -> io::Result<()>{
 /// If it is then nothing will happen.
 /// If it's not then it will be added
 /// to your profile.
-#[cfg(target_family = "unix")]
 pub fn check_or_set<T, U>(var: T, value: U) -> io::Result<()>
 where
     T: fmt::Display + AsRef<std::ffi::OsStr>,
     U: fmt::Display,
 {
     env::var(&var).map(|_| ()).or_else(|_| set(var, value))
-}
-
-#[cfg(target_os = "windows")]
-pub fn check_or_set<T, U>(var: T, value: U) -> io::Result<()>
-where
-    T: fmt::Display + AsRef<std::ffi::OsStr>,
-    U: fmt::Display,
-{
-    inject(format!("setenv_set_if_not_exist {} {}", var, value).as_str())
 }
 
 #[cfg(target_family = "unix")]
