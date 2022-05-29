@@ -1,6 +1,6 @@
 [package]
 name = "set_env"
-version = "1.2.2"
+version = "1.3.0"
 authors = ["CGQAQ <m.jason.liu@outlook.com>"]
 edition = "2021"
 description = "Sets environment variables permanently across all major platforms"
@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 keywords = ["env", "environment", "variable"]
 
-[target.'cfg(not(windows))'.dependencies]
+[dependencies]
 dirs = "4.0.0"
 
 [target.'cfg(windows)'.dependencies]
