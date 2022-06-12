@@ -35,7 +35,7 @@ use std::env::VarError;
 use std::fmt;
 use std::io;
 
-#[cfg(target_family = "windows")]
+#[cfg(target_family="windows")]
 pub fn do_prerequisites() {
     use std::fs;
 
@@ -51,15 +51,13 @@ pub fn do_prerequisites() {
             fs::write(path, template).unwrap();
         } else {
             let mut content = fs::read_to_string(path).unwrap();
-            if !content.contains("# ----------------------------------SET_ENV_BEG")
-                || !content.contains("# ----------------------------------SET_ENV_END")
-            {
+            if !content.contains("# ----------------------------------SET_ENV_BEG") || !content.contains("# ----------------------------------SET_ENV_END") {
                 content.push('\r');
                 content.push('\n');
                 content.push_str(template);
             }
         }
-        return;
+        return
     }
 
     eprintln!("document path is not exists");
@@ -67,26 +65,22 @@ pub fn do_prerequisites() {
 }
 
 #[cfg(target_os = "windows")]
-pub fn inject(it: &str) -> io::Result<()> {
+pub fn inject(it: &str) -> io::Result<()>{
     use std::fs;
 
     do_prerequisites();
 
-    let profile_path = dirs::document_dir()
-        .unwrap()
-        .join("WindowsPowerShell/Profile.ps1");
+    let profile_path = dirs::document_dir().unwrap().join("WindowsPowerShell/Profile.ps1");
 
     let content = fs::read_to_string(&profile_path)?;
     let mut content_parts: Vec<&str> = content.split("\r\n").collect();
 
-    let idx = content_parts
-        .iter()
-        .position(|it| it == &"# ----------------------------------SET_ENV_DEFS_END")
-        .unwrap();
+    let idx = content_parts.iter().position(|it| it == &"# ----------------------------------SET_ENV_DEFS_END").unwrap();
     content_parts.insert(idx, it);
 
-    fs::write(profile_path, content_parts.join("\r\n"))
+    fs::write(profile_path,  content_parts.join("\r\n"))
 }
+
 
 /// Checks if a environment variable is set.
 /// If it is then nothing will happen.
@@ -103,7 +97,9 @@ where
 #[cfg(target_family = "unix")]
 pub fn get<'a, T: fmt::Display>(var: T) -> io::Result<String> {
     env::var(var.to_string()).map_err(|err| match err {
-        VarError::NotPresent => io::Error::new(io::ErrorKind::NotFound, "Variable not present."),
+        VarError::NotPresent => {
+            io::Error::new(io::ErrorKind::NotFound, "Variable not present.")
+        }
         VarError::NotUnicode(_) => {
             io::Error::new(io::ErrorKind::Unsupported, "Encoding not supported.")
         }
@@ -113,9 +109,7 @@ pub fn get<'a, T: fmt::Display>(var: T) -> io::Result<String> {
 #[cfg(target_os = "windows")]
 pub fn get<'a, T: fmt::Display>(var: T) -> io::Result<String> {
     let key = RegKey::predef(HKEY_CURRENT_USER).open_subkey("Environment")?;
-    Ok(key
-        .get_value::<String, String>(var.to_string())?
-        .to_string())
+    Ok(key.get_value::<String, String>(var.to_string())?.to_string())
 }
 
 /// Appends a value to an environment variable
@@ -130,7 +124,7 @@ pub fn append<T: fmt::Display>(var: T, value: T) -> io::Result<()> {
 /// Useful for appending a value to PATH
 #[cfg(target_os = "windows")]
 pub fn append<T: fmt::Display>(var: T, value: T) -> io::Result<()> {
-    inject(format!("setenv_path_append {} {}", var, value).as_str())
+    inject(format!("setenv_append {} {}", var, value).as_str())
 }
 
 /// Prepends a value to an environment variable
@@ -146,7 +140,7 @@ pub fn prepend<T: fmt::Display>(var: T, value: T) -> io::Result<()> {
 /// Useful for prepending a value to PATH
 #[cfg(target_os = "windows")]
 pub fn prepend<T: fmt::Display>(var: T, value: T) -> io::Result<()> {
-    inject(format!("setenv_path_prepend {} {}", var, value).as_str())
+    inject(format!("setenv_prepend {} {}", var, value).as_str())
 }
 
 /// Sets an environment variable without checking
