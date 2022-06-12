@@ -1,6 +1,6 @@
 [package]
 name = "set_env"
-version = "1.3.3"
+version = "1.3.4"
 authors = ["CGQAQ <m.jason.liu@outlook.com>"]
 edition = "2021"
 description = "Sets environment variables permanently across all major platforms"
