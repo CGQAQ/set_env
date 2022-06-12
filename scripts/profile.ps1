@@ -1,4 +1,5 @@
 # ----------------------------------SET_ENV_BEG
+# ----------------------------------VER${VER}
 # ----------------------------------SET_ENV_UFNS_BEG
 function setenv_set([string]$name, [string]$value) {
     New-Item env:\$name -Value $value -Force | Out-Null
