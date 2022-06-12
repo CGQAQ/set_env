@@ -23,14 +23,7 @@ use std::io::Write;
 #[cfg(target_family = "unix")]
 use std::path::PathBuf;
 
-#[cfg(target_family = "windows")]
-use winreg::RegKey;
-
-#[cfg(target_family = "windows")]
-use winreg::enums::HKEY_CURRENT_USER;
-
 use std::env;
-#[cfg(target_family = "unix")]
 use std::env::VarError;
 use std::fmt;
 use std::io;
@@ -43,7 +36,7 @@ pub fn do_prerequisites() {
     if let Some(path) = path {
         let pkg_version = env!("CARGO_PKG_VERSION");
 
-        let template = include_str!("../scripts/profile.ps1").replace("${VER}", &pkg_version);
+        let template = include_str!("../scripts/profile.ps1").replace("${VER}", pkg_version);
         let path = path.join("WindowsPowerShell");
         if !path.exists() {
             fs::create_dir_all(&path).unwrap();
@@ -109,22 +102,13 @@ where
     env::var(&var).map(|_| ()).or_else(|_| set(var, value))
 }
 
-#[cfg(target_family = "unix")]
-pub fn get<'a, T: fmt::Display>(var: T) -> io::Result<String> {
+pub fn get<T: fmt::Display>(var: T) -> io::Result<String> {
     env::var(var.to_string()).map_err(|err| match err {
         VarError::NotPresent => io::Error::new(io::ErrorKind::NotFound, "Variable not present."),
         VarError::NotUnicode(_) => {
             io::Error::new(io::ErrorKind::Unsupported, "Encoding not supported.")
         }
     })
-}
-
-#[cfg(target_os = "windows")]
-pub fn get<'a, T: fmt::Display>(var: T) -> io::Result<String> {
-    let key = RegKey::predef(HKEY_CURRENT_USER).open_subkey("Environment")?;
-    Ok(key
-        .get_value::<String, String>(var.to_string())?
-        .to_string())
 }
 
 /// Appends a value to an environment variable

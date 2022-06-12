@@ -12,6 +12,3 @@ keywords = ["env", "environment", "variable"]
 
 [dependencies]
 dirs = "4.0.0"
-
-[target.'cfg(windows)'.dependencies]
-winreg = "0.10"
